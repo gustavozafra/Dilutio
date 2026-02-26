@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Download, FileText, FlaskConical, Beaker, Check, Hexagon, Moon, Sun } from 'lucide-react';
 import Snowfall from 'react-snowfall';
-import { pdf } from '@react-pdf/renderer';
 import { CalcMode, PatientPrescription } from './types';
 import { useCannabisCalculations } from './hooks/useCannabisCalculations';
 import { PdfPreviewModal } from './components/PdfPreviewModal';
-import { NativePdfDocument } from './components/NativePdfDocument';
 import { TraceabilityPanel } from './components/TraceabilityPanel';
 import { MatrixStandardizationForm } from './components/MatrixStandardizationForm';
 import { DashboardStatus } from './components/DashboardStatus';
@@ -91,6 +89,12 @@ export default function App() {
     setPdfType(type);
     setIsGenerating(true);
     try {
+      // Lazy-load heavy PDF dependencies only when needed
+      const [{ pdf }, { NativePdfDocument }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('./components/NativePdfDocument'),
+      ]);
+
       const doc = (
         <NativePdfDocument
           pdfType={type}
